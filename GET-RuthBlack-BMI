@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery.getJSON demo</title>
+  <style>
+  div.patient {
+    font-weight: bold;
+  }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<body>
+ 
+<div id="patientname"></div><div id="patientdata"></div>
+ 
+<script>
+	// Create the XHR object.
+	function createCORSRequest(method, url) {
+	  var xhr = new XMLHttpRequest();	  
+	  
+	  //set credentials	  
+	  xhr.withCredentials = true;
+	  
+	  if ("withCredentials" in xhr) {
+		// XHR for Chrome/Firefox/Opera/Safari.
+		xhr.open(method, url, true);
+	  } else if (typeof XDomainRequest != "undefined") {
+		// XDomainRequest for IE.
+		xhr = new XDomainRequest();
+		xhr.open(method, url);
+	  } else {
+		// CORS not supported.
+		xhr = null;
+	  }
+	  return xhr;
+	}
+
+	// Make the actual CORS request.
+	function makeCorsRequest() {	  
+	  var patient_id = '665677'
+
+	  var url = 'http://tutsgnfhir.com/Patient/' + patient_id + '$everything?_format=json';
+
+	  var xhr = createCORSRequest('GET', url);
+	  if (!xhr) {
+		alert('CORS not supported');
+		return;
+	  }
+
+	  // Response handlers.
+	  xhr.onload = function() {
+		//var text = xhr.responseText;
+		var jsonResp = JSON.parse(xhr.responseText);
+		
+		// print json in text format
+		//console.log(xhr.responseText);
+		// print json object
+		console.log(jsonResp);
+
+		//output patient data
+		$( '<div class="patient">' ).text( "Name: " + jsonResp.entry[0].resource.name[0].family[0] + ', ' + jsonResp.entry[0].resource.name[0].given[0] + ' ' + jsonResp.entry[0].resource.name[0].given[1] ).appendTo( "#patientname" );
+		$( '<div class="patient">' ).text( "BMI: " + jsonResp.entry[103].resource.valueQuantity.value + ' ' + jsonResp.entry[103].resource.valueQuantity.unit ).appendTo( "#patientdata" );
+	  };
+
+	  xhr.onerror = function() {
+		alert('Woops, there was an error making the request.');
+	  };
+
+	  xhr.send();
+	}
+	
+	makeCorsRequest();
+</script>
+ 
+</body>
+</html>
